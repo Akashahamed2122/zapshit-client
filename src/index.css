@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
+/* App.css or index.css */
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
 
 
 .font-urbanist {

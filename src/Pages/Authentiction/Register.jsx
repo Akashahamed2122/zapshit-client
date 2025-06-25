@@ -1,7 +1,16 @@
-import React from "react";
+import React, { use, useContext } from "react";
 import { useForm } from "react-hook-form";
+import UseAuth from "../../Hooks/UseAuth";
+import { AuthContext } from "../../contexts/AuthContext/AuthContext";
+import SocialLogin from "./SocialLogin";
+
 
 const Register = () => {
+  // const {createUser}=UseAuth
+  const  {createUser}=useContext(AuthContext)
+  // console.log(createUser)
+
+
   const {
     register,
     handleSubmit,
@@ -10,7 +19,19 @@ const Register = () => {
 
   const onSubmit = (data) => {
     console.log(data);
+    createUser(data.email,data.password)
+      .then(result=>{
+        console.log(result.user)
+      })
+      .catch(error=>{
+        console.log(error.message)
+      })
   };
+
+
+
+
+
 
   return (
     <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -82,7 +103,9 @@ const Register = () => {
 )}
 
 
-          <button className="btn btn-neutral mt-4">Login</button>
+          <button type="submit" className="btn btn-neutral bg-[#caeb66] border-none text-black mt-4">Register</button>
+          <br />
+          <SocialLogin></SocialLogin>
         </form>
       </div>
     </div>
