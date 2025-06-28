@@ -71,32 +71,7 @@ const SendParcel = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-        {/* Parcel Info */}
-        {/* <section>
-          <h2 className="text-xl font-semibold mb-4 border-b pb-2">📦 Parcel Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <select {...register("parcelType", { required: true })} className="select select-bordered w-full">
-              <option value="">Select Type</option>
-              <option value="document">Document</option>
-              <option value="non-document">Non-Document</option>
-            </select>
-
-            <input
-              {...register("title", { required: true })}
-              placeholder="Parcel Title"
-              className="input input-bordered w-full"
-            />
-
-            <input
-              type="number"
-              step="0.1"
-              {...register("weight")}
-              placeholder="Weight (kg)"
-              className="input input-bordered w-full"
-              disabled={type !== "non-document"}
-            />
-          </div>
-        </section> */}
+     
 
         {/* Parcel Info */}
 <section>
