@@ -5,7 +5,7 @@ import Teams from '../Teams';
 import Features from '../Features/Features';
 import BeMerchant from '../BeMerchent';
 import Customer from '../Customer';
-import SendPercel from '../SendPercel';
+
 
 const Home = () => {
     return (
@@ -16,7 +16,7 @@ const Home = () => {
             <Features></Features>
             <BeMerchant></BeMerchant>
             <Customer></Customer>
-            <SendPercel></SendPercel>
+           
         </div>
     );
 };

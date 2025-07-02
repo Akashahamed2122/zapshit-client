@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast, { Toaster } from 'react-hot-toast';
 import { format } from 'date-fns';
 
-const divisions = ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Mymensingh', 'Rangpur'];
-const serviceCenters = ['SC-Dhaka', 'SC-Chattogram', 'SC-Rajshahi'];
+const PromiseData = fetch('serviceCenter.json').then(res => res.json());
 
 const SendParcel = () => {
+  const data = use(PromiseData);
+
   const {
     register,
     handleSubmit,
@@ -18,14 +19,15 @@ const SendParcel = () => {
   const [pendingData, setPendingData] = useState(null);
   const type = watch('parcelType');
 
+  // 🔥 Extract unique divisions dynamically
+  const uniqueDivisions = Array.from(new Set(data.map(item => item.region)));
+
   const calculateCost = (data) => {
     const baseCost = data.parcelType === 'document' ? 50 : 100;
-    const weightCost =
-      data.parcelType === 'non-document' && data.weight
-        ? parseFloat(data.weight) * 20
-        : 0;
-    const centerFee =
-      data.receiverServiceCenter === data.senderServiceCenter ? 0 : 30;
+    const weightCost = data.parcelType === 'non-document' && data.weight
+      ? parseFloat(data.weight) * 20
+      : 0;
+    const centerFee = data.receiverServiceCenter === data.senderServiceCenter ? 0 : 30;
     return baseCost + weightCost + centerFee;
   };
 
@@ -63,7 +65,7 @@ const SendParcel = () => {
   };
 
   return (
-    <div className="w-12/12  mx-auto my-12 px-6 py-10 bg-white rounded-xl shadow-md">
+    <div className="w-12/12 mx-auto my-12 px-6 py-10 bg-white rounded-xl shadow-md">
       <Toaster />
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-primary">Send a Parcel</h1>
@@ -71,112 +73,113 @@ const SendParcel = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-     
 
         {/* Parcel Info */}
-<section>
-  <h2 className="text-xl font-semibold mb-4 border-b pb-2">📦 Parcel Information</h2>
+        <section>
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">📦 Parcel Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <p className="mb-1 font-medium">Parcel Type</p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="document"
+                    {...register("parcelType", { required: true })}
+                    className="radio radio-primary"
+                  />
+                  <span>Document</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="non-document"
+                    {...register("parcelType", { required: true })}
+                    className="radio radio-primary"
+                  />
+                  <span>Non-Document</span>
+                </label>
+              </div>
+              {errors.parcelType && (
+                <p className="text-red-500 text-sm mt-1">Please select a type</p>
+              )}
+            </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-    {/* Parcel Type as Radio */}
-    <div>
-      <p className="mb-1 font-medium">Parcel Type</p>
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            value="document"
-            {...register("parcelType", { required: true })}
-            className="radio radio-primary"
-          />
-          <span>Document</span>
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            value="non-document"
-            {...register("parcelType", { required: true })}
-            className="radio radio-primary"
-          />
-          <span>Non-Document</span>
-        </label>
-      </div>
-      {errors.parcelType && (
-        <p className="text-red-500 text-sm mt-1">Please select a type</p>
-      )}
-    </div>
+            <div>
+              <input
+                {...register("title", { required: true })}
+                placeholder="Parcel Title"
+                className="input input-bordered w-full"
+              />
+            </div>
 
-    {/* Parcel Title */}
-    <div>
-      <input
-        {...register("title", { required: true })}
-        placeholder="Parcel Title"
-        className="input input-bordered w-full"
-      />
-    </div>
+            <div>
+              <input
+                type="number"
+                step="0.1"
+                {...register("weight")}
+                placeholder="Weight (kg)"
+                className="input input-bordered w-full"
+                disabled={type !== "non-document"}
+              />
+            </div>
+          </div>
+        </section>
 
-    {/* Weight Input */}
-    <div>
-      <input
-        type="number"
-        step="0.1"
-        {...register("weight")}
-        placeholder="Weight (kg)"
-        className="input input-bordered w-full"
-        disabled={type !== "non-document"}
-      />
-    </div>
-  </div>
-</section>
-{/* Sender & Receiver Info Side by Side */}
-<section>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    
-    {/* Sender Info */}
-    <div>
-      <h2 className="text-xl font-semibold mb-4 border-b pb-2">👤 Sender Information</h2>
-      <div className="grid grid-cols-1 gap-4">
-        <input {...register("senderName", { required: true })} placeholder="Sender Name" className="input input-bordered w-full" />
-        <input {...register("senderContact", { required: true })} placeholder="Contact Number" className="input input-bordered w-full" />
-        <select {...register("senderRegion", { required: true })} className="select select-bordered w-full">
-          <option value="">Select Division</option>
-          {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select {...register("senderServiceCenter", { required: true })} className="select select-bordered w-full">
-          <option value="">Select Service Center</option>
-          {serviceCenters.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <input {...register("senderAddress", { required: true })} placeholder="Full Address" className="input input-bordered w-full" />
-        <input {...register("pickupInstruction", { required: true })} placeholder="Pickup Instruction" className="input input-bordered w-full" />
-      </div>
-    </div>
+        {/* Sender & Receiver Info */}
+        <section>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sender Info */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4 border-b pb-2">👤 Sender Information</h2>
+              <div className="grid grid-cols-1 gap-4">
+                <input {...register("senderName", { required: true })} placeholder="Sender Name" className="input input-bordered w-full" />
+                <input {...register("senderContact", { required: true })} placeholder="Contact Number" className="input input-bordered w-full" />
+                <select {...register("senderRegion", { required: true })} className="select select-bordered w-full">
+                  <option value="">Select Division</option>
+                  {uniqueDivisions.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                <select {...register("senderServiceCenter", { required: true })} className="select select-bordered w-full">
+                  <option value="">Select Service Center</option>
+                  {data.map((center, index) => (
+                    <option key={index} value={center.city}>
+                      {center.city} - {center.district}
+                    </option>
+                  ))}
+                </select>
+                <input {...register("senderAddress", { required: true })} placeholder="Full Address" className="input input-bordered w-full" />
+                <input {...register("pickupInstruction", { required: true })} placeholder="Pickup Instruction" className="input input-bordered w-full" />
+              </div>
+            </div>
 
-    {/* Receiver Info */}
-    <div>
-      <h2 className="text-xl font-semibold mb-4 border-b pb-2">📥 Receiver Information</h2>
-      <div className="grid grid-cols-1 gap-4">
-        <input {...register("receiverName", { required: true })} placeholder="Receiver Name" className="input input-bordered w-full" />
-        <input {...register("receiverContact", { required: true })} placeholder="Contact Number" className="input input-bordered w-full" />
-        <select {...register("receiverRegion", { required: true })} className="select select-bordered w-full">
-          <option value="">Select Division</option>
-          {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select {...register("receiverServiceCenter", { required: true })} className="select select-bordered w-full">
-          <option value="">Select Service Center</option>
-          {serviceCenters.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <input {...register("receiverAddress", { required: true })} placeholder="Full Address" className="input input-bordered w-full" />
-        <input {...register("deliveryInstruction", { required: true })} placeholder="Delivery Instruction" className="input input-bordered w-full" />
-      </div>
-    </div>
-
-  </div>
-</section>
-
-      
-
-
-
+            {/* Receiver Info */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4 border-b pb-2">📥 Receiver Information</h2>
+              <div className="grid grid-cols-1 gap-4">
+                <input {...register("receiverName", { required: true })} placeholder="Receiver Name" className="input input-bordered w-full" />
+                <input {...register("receiverContact", { required: true })} placeholder="Contact Number" className="input input-bordered w-full" />
+                <select {...register("receiverRegion", { required: true })} className="select select-bordered w-full">
+                  <option value="">Select Division</option>
+                  {uniqueDivisions.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                <select {...register("receiverServiceCenter", { required: true })} className="select select-bordered w-full">
+                  <option value="">Select Service Center</option>
+                  {data.map((center, index) => (
+                    <option key={index} value={center.city}>
+                      {center.city} - {center.district}
+                    </option>
+                  ))}
+                </select>
+                <input {...register("receiverAddress", { required: true })} placeholder="Full Address" className="input input-bordered w-full" />
+                <input {...register("deliveryInstruction", { required: true })} placeholder="Delivery Instruction" className="input input-bordered w-full" />
+              </div>
+            </div>
+          </div>
+        </section>
 
         <button type="submit" className="btn btn-primary w-full text-lg font-bold">Submit Parcel</button>
       </form>

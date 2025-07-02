@@ -26,7 +26,8 @@ export const router = createBrowserRouter([
         },
         {
           path:'/send-percel',
-          element: <PrivateRoute> <SendPercel></SendPercel> </PrivateRoute>
+          element: <PrivateRoute> <SendPercel></SendPercel> </PrivateRoute>,
+          loader: ()=> fetch('serviceCenter.json')
         }
     ]
   },
