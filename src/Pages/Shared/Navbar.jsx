@@ -32,6 +32,11 @@ const Navbar = () => {
     <li><NavLink to={`/`}>Home</NavLink></li>
     <li><NavLink to={`/coverage`}>Coverage</NavLink></li>
     <li><NavLink to={`/send-percel`}>SendPercel</NavLink></li>
+    {
+      user && <>
+       <li><NavLink to={`/dashbord`}>Dash bord</NavLink></li>
+       </>
+    }
     <li><NavLink to={`/about`}>About us</NavLink></li>
     
     </>
